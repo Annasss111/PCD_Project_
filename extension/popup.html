@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            width: 320px;
+            padding: 20px;
+            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #333;
+            background-color: #f8f9fa;
+            margin: 0;
+        }
+
+        /* --- HEADER --- */
+        .header {
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+        }
+        .logo {
+            font-size: 16px;
+            font-weight: 700;
+            color: #005c9c; /* OpenStack Blue */
+            letter-spacing: 0.5px;
+        }
+
+        /* --- SLIDER SECTION --- */
+        .control-group {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .label-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+        }
+        .val-badge {
+            background: #e7f1ff;
+            color: #005c9c;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .status-text {
+            font-size: 10px;
+            color: #28a745;
+            font-weight: 600;
+            opacity: 0; 
+            transition: opacity 0.3s;
+            margin-top: 2px;
+            text-align: right;
+        }
+        .status-text.visible {
+            opacity: 1;
+        }
+
+        /* Slider Styling */
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+            accent-color: #005c9c;
+        }
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #868e96;
+            margin-top: 8px;
+        }
+
+        /* --- MAIN BUTTON --- */
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #005c9c;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            transition: background-color 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button:hover {
+            background: #004a7c;
+        }
+        button:active {
+            transform: translateY(1px);
+        }
+
+        /* --- COLLAPSIBLE INFO SECTION --- */
+        .toggle-link-container {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 5px;
+        }
+        #toggle-info {
+            font-size: 11px;
+            color: #6c757d;
+            text-decoration: none;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 2px;
+            transition: color 0.2s;
+        }
+        #toggle-info:hover {
+            color: #005c9c;
+            border-bottom-color: #005c9c;
+        }
+        .icon { font-size: 12px; margin-right: 3px; }
+        .arrow {
+            font-size: 8px;
+            margin-left: 4px;
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+        .arrow.open {
+            transform: rotate(180deg);
+        }
+
+        /* Hidden Box Styling */
+        .info-group {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border: 1px solid #e9ecef;
+            font-size: 11px;
+        }
+        .factor-row {
+            display: flex;
+            align-items: start;
+            margin-bottom: 12px;
+            line-height: 1.35;
+        }
+        .factor-row:last-child { margin-bottom: 0; }
+        .factor-icon {
+            min-width: 22px;
+            font-size: 14px;
+            margin-top: 0;
+        }
+        .factor-content {
+            flex: 1;
+        }
+        .factor-name {
+            font-weight: 700;
+            color: #495057;
+            display: block;
+            margin-bottom: 2px;
+            font-size: 11px;
+        }
+        .math-note {
+            color: #6c757d;
+            font-style: italic;
+            font-size: 10.5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <span class="logo">BackportCheck</span>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="control-group">
+        <div class="label-row">
+            <span class="label-text">Sensitivity Threshold</span>
+            <div style="text-align: right;">
+                <span id="thresh-val" class="val-badge">0.50</span>
+                <div id="save-status" class="status-text">✓ Saved</div>
+            </div>
+        </div>
+        
+        <input type="range" id="threshold" min="0.1" max="0.9" step="0.01" value="0.5">
+        
+        <div class="range-labels">
+            <span>More Permissive</span>
+            <span>Stricter</span>
+        </div>
+    </div>
+
+    <!-- ACTION BUTTON -->
+    <button id="toggle-panel">
+        Toggle Assistant Overlay
+    </button>
+
+    <!-- COLLAPSIBLE TRIGGER -->
+    <div class="toggle-link-container">
+        <a href="#" id="toggle-info">
+             <span class="icon">ℹ️</span> Risk Metrics: Definitions & Calculation Logic <span class="arrow">▼</span>
+        </a>
+    </div>
+
+    <!-- HIDDEN SCIENTIFIC DEFINITIONS -->
+    <div id="info-section" class="info-group" style="display: none;">
+        
+        <div class="factor-row">
+            <span class="factor-icon">👤</span>
+            <div class="factor-content">
+                <span class="factor-name">Author Reliability (Trust Score)</span>
+                <span class="math-note">
+                    Ratio of accepted backports to total code churn (log-scaled). Penalizes high-volume submissions with low historical acceptance.
+                </span>
+            </div>
+        </div>
+
+        <div class="factor-row">
+            <span class="factor-icon">📂</span>
+            <div class="factor-content">
+                <span class="factor-name">File Frequency </span>
+                <span class="math-note">
+                    Historical probability that the modified file paths are accepted in backports (based on training dataset).
+                </span>
+            </div>
+        </div>
+
+        <div class="factor-row">
+            <span class="factor-icon">🧩</span>
+            <div class="factor-content">
+                <span class="factor-name">Code Spread (Shannon Entropy)</span>
+                <span class="math-note">
+                    Quantifies the dispersion of modifications across files. High entropy (>3) indicates scattered, cross-module changes (Higher Regression Risk).
+                </span>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
